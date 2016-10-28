@@ -24,3 +24,6 @@ colnames(t)<-c("cuisine", "FreqCount")
 
 sorting by class counts:
 t<-t[order(-t$FreqCount),]
+
+
+#to also consider http://www.writewords.org.uk/word_count.asp for getting freq counts of clean words, and not just the script 'prelimprocessing.R'
