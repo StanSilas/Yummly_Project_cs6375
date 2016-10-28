@@ -1,0 +1,26 @@
+#here we will start with the intial unclean train and test data 
+require(rjson)
+require(RJSONIO)
+require(jsonlite)
+require(NLP)
+require(tm)
+require(SnowballC) 
+require(forecast)
+require(ttutils)
+require(stringdist)
+library(plyr)
+require(ggplot2)
+train_unclean  <- fromJSON("C:/Users/vivek/Desktop/Fall 2016/Machine Learning/Project/Project/train/train.json", flatten = TRUE)
+
+#converting cuisine into factors
+
+train_unclean$cuisine<-as.factor(train_unclean$cuisine)
+
+#storing the counts per class 'cuisine'
+t<-xtabs(~cuisine, data=train_unclean)
+
+t<-as.data.frame(t)
+colnames(t)<-c("cuisine", "FreqCount")
+
+sorting by class counts:
+t<-t[order(-t$FreqCount),]
