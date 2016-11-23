@@ -1,0 +1,114 @@
+require(data.table)
+require(rjson)
+require(RJSONIO)
+train_1 <- fromJSON("train.json", flatten = TRUE)
+test_1 <- fromJSON("test.json", flatten = TRUE)
+
+
+
+
+train_df <- do.call(rbind, train_1) 
+train_df<-as.data.frame(train_df)
+
+
+#ttps<-as.data.frame(train_df, row.names = NULL, optional = FALSE,
+#              cut.names = FALSE, col.names = names(train_df), fix.empty.names = TRUE,
+ #             stringsAsFactors = default.stringsAsFactors())
+
+
+ing_list<-unique(train_df$cuisine)
+
+cu_greek<-train_df[train_df$cuisine == 'greek',]
+cu_southern<-train_df[train_df$cuisine == 'southern_us',]
+cu_filipino<-train_df[train_df$cuisine == 'filipino',]
+cu_indian<-train_df[train_df$cuisine == 'indian',]
+
+cu_jamaica<-train_df[train_df$cuisine == 'jamaican',]
+cu_spanish<-train_df[train_df$cuisine == 'spanish',]
+cu_italina<-train_df[train_df$cuisine == 'italian',]
+cu_mexican<-train_df[train_df$cuisine == 'mexican',]
+
+cu_chinese<-train_df[train_df$cuisine == 'chinese',]
+cu_brit<-train_df[train_df$cuisine == 'british',]
+cu_thai<-train_df[train_df$cuisine == 'thai',]
+cu_vietnamese<-train_df[train_df$cuisine == 'vietnamese',]
+
+cu_canjun<-train_df[train_df$cuisine == 'cajun_creole',]
+cu_brazilian<-train_df[train_df$cuisine == 'brazilian',]
+cu_french<-train_df[train_df$cuisine == 'french',]
+cu_japanese<-train_df[train_df$cuisine == 'japanese',]
+
+cu_irish<-train_df[train_df$cuisine == 'irish',]
+cu_korean<-train_df[train_df$cuisine == 'korean',]
+cu_moroccan<-train_df[train_df$cuisine == 'moroccan',]
+cu_russian<-train_df[train_df$cuisine == 'russian',]
+
+
+
+library(tidyr)
+library(dplyr)
+vt<-v %>% 
+    mutate(ingredients = strsplit(as.character(ingredients), ",")) %>% 
+    unnest(ingredients)
+### put this in for loop so that it iterates over the 20 cuisines####
+
+corpus <- Corpus(VectorSource(cu_indian$ingredients))
+corpus <- tm_map(corpus, tolower)
+corpus <- tm_map(corpus, removePunctuation)
+corpus <- tm_map(corpus, removeWords, c(stopwords('english')))
+corpus <- tm_map(corpus, stripWhitespace)
+corpus <- tm_map(corpus, stemDocument)
+
+corpus <- tm_map(corpus, PlainTextDocument)
+copy_corpus<-corpus
+frequencies <- DocumentTermMatrix(corpus)
+freq <- colSums(as.matrix(frequencies))
+
+
+
+length(freq)
+ord <- order(freq)
+freq[head(ord)]
+freq[tail(ord)]
+
+head(table(freq),20)
+tail(table(freq),20)
+
+sparse <- removeSparseTerms(frequencies, 1 - 3/nrow(frequencies))
+dim(sparse)
+wf <- data.frame(word = names(freq), freq = freq)
+
+wf<-wf[order(-freq),] 
+  
+head(wf)
+
+### end of the for looop will be here#### 
+
+
+#### new short cut#########
+
+#inglist will get all the unique cuisines from the data frame
+ing_list<-unique(train_df$cuisine)
+for (i in 1:20) {
+  cu_test<-train_df[train_df$cuisine == ing_list[[i]],]
+  #change cu_test so that it becomes dynamically_named_variable in nature
+##n ow paste tm text mining part here and it should print the top ingredients per each cuisine.
+
+}
+
+#####
+require(ggplot2)
+wf2<-wf[1:10,]
+plot(wf2$word ~ wf2$freq )
+plot(wf2$freq ~ wf2$word )
+
+with(subset(wf,freq>1000), plot(wf$freq,wf$word))
+
+slices<-wf2$freq
+lbls<-wf2$word
+
+pct <- round(slices/sum(slices)*100)
+lbls <- paste(lbls, pct) # add percents to labels 
+
+pie(slices, labels = lbls, main="Pie Chart of Indian Ingredients")
+
